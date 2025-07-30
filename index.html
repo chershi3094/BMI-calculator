@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMI Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 30px;
+      color: #333;
+    }
+    .container {
+      background: white;
+      max-width: 600px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #0066cc;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    select, input {
+      padding: 8px;
+      width: 100%;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #result, #advice, #suggestion, #share {
+      margin-top: 25px;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      line-height: 1.6;
+    }
+    #share button {
+      background: #25D366;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BMI Calculator</h1>
+    <label for="gender">Gender</label>
+    <select id="gender">
+      <option value="">--Select--</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+
+    <label for="dob">Date of Birth</label>
+    <input type="date" id="dob" max="<?= date('Y-m-d') ?>" />
+
+    <label for="height">Height (cm)</label>
+    <input type="number" id="height" placeholder="Enter height in cm" />
+
+    <label for="weight">Weight (kg)</label>
+    <input type="number" id="weight" placeholder="Enter weight in kg" />
+
+    <button onclick="calculateBMI()">Calculate BMI</button>
+
+    <div id="result"></div>
+    <div id="advice"></div>
+    <div id="suggestion"></div>
+    <div id="share"></div>
+  </div>
+
+  <script>
+    function calculateBMI() {
+      const gender = document.getElementById('gender').value;
+      const heightCm = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const dob = document.getElementById('dob').value;
+
+      if (!gender || !heightCm || !weight || !dob) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      const heightM = heightCm / 100;
+      const bmi = (weight / (heightM * heightM)).toFixed(1);
+
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+
+      document.getElementById('result').innerHTML = `
+        <strong>Your BMI:</strong> ${bmi}<br>
+        <strong>Age:</strong> ${age}
+      `;
+
+      let message = '';
+      let suggestion = '';
+      let targetWeight;
+      let diff;
+
+      if (bmi < 18.5) {
+        targetWeight = (18.5 * heightM * heightM).toFixed(1);
+        diff = (targetWeight - weight).toFixed(1);
+        message = `You are <b>underweight</b>. You need to <b>gain about ${diff} kg</b> to reach a healthy BMI of 18.5.`;
+        suggestion = `Try protein-rich foods, nuts, full-fat dairy, whole grains, and stay consistent. 🥛🍚🍠🍗`;
+      } else if (bmi >= 18.5 && bmi < 25) {
+        message = `You are in the <b>healthy</b> BMI range. Great job! 🎉 Keep maintaining your weight with balanced diet and regular exercise.`;
+        suggestion = `Eat a mix of fruits, vegetables, lean proteins, whole grains, and stay active. 🍎🥗🏃‍♂️`;
+      } else if (bmi >= 25 && bmi < 30) {
+        targetWeight = (24.9 * heightM * heightM).toFixed(1);
+        diff = (weight - targetWeight).toFixed(1);
+        message = `You are <b>overweight</b>. You need to <b>lose about ${diff} kg</b> to reach a healthy BMI of 24.9.`;
+        suggestion = `Avoid fried foods, reduce sugar, eat more fiber, and drink water. 🥦🍋🚴‍♂️`;
+      } else {
+        targetWeight = (24.9 * heightM * heightM).toFixed(1);
+        diff = (weight - targetWeight).toFixed(1);
+        message = `You are in the <b>obese</b> category. You need to <b>lose about ${diff} kg</b> to reach a healthy BMI of 24.9.`;
+        suggestion = `Focus on calorie deficit, regular walking, portion control, and healthy swaps. 🍵🥗🚶‍♀️`;
+      }
+
+      document.getElementById('advice').innerHTML = `<strong>Advice:</strong> ${message}`;
+      document.getElementById('suggestion').innerHTML = `<strong>Suggested Foods:</strong> ${suggestion}`;
+
+      const shareText = `My BMI is ${bmi}. ${message.replace(/<[^>]*>/g, '')}`;
+      const whatsappLink = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+      document.getElementById('share').innerHTML = `
+        <strong>Want to share?</strong><br>
+        <a href="${whatsappLink}" target="_blank">
+          <button>Share on WhatsApp</button>
+        </a>
+      `;
+    }
+  </script>
+</body>
+</html>
